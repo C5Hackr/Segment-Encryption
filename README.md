@@ -5,7 +5,7 @@ Segment-Encryption-Decryption (SED) is a project I made during a all nighter for
 ## Screenshots
 
 **Before:**
-![image](https://raw.githubusercontent.com/C5Hackr/Segment-Encryption/main/Images/Before.jpg)
+![image](https://raw.githubusercontent.com/C5Hackr/Segment-Encryption/main/Images/Before.png)
 **After:**
 ![image](https://raw.githubusercontent.com/C5Hackr/Segment-Encryption/main/Images/After.jpg)
 **Output (Execution):**

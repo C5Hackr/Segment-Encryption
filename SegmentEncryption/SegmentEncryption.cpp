@@ -205,7 +205,7 @@ __declspec(noinline) int DemoFunction() //Function type must be a INT, and must 
 
 int main() //Project must be in Release mode, x64 and x86 are both supported.
 {
-	printf("Encrypting code section (Execution will pause once finish for inspection in x64dbg)...\n");
+	printf("Encrypting code section (Execution will pause once encryption is finished for inspection in x64dbg)...\n");
 	EncryptFunction((uintptr_t)testCCode); //Encrypt function "testCCode".
 	EncryptFunction((uintptr_t)testCCode2); //Encrypt function "testCCode2".
 	system("pause");

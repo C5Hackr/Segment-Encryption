@@ -2,6 +2,13 @@
 #include <iostream>
 #include <signal.h>
 
+#define USE_XOR_ENCRYPTION TRUE
+
+#if USE_XOR_ENCRYPTION
+unsigned char xor_key[] = "YwAYwAonvsgHUbnoYwAonvsgHUbnnvsgHUbn";
+size_t xor_key_size = strlen((char*)xor_key);
+#endif
+
 typedef struct {
 	uintptr_t FunctionAddress;
 	uintptr_t ReturnAddress;
@@ -22,9 +29,30 @@ __declspec(dllexport) int endfunction(int a, int b)
 }
 #pragma optimize("", on)
 
+#if USE_XOR_ENCRYPTION
+void xor_encrypt(unsigned char* data, size_t data_len, unsigned char* key, size_t key_len)
+{
+	for (size_t i = 0; i < data_len; i++)
+	{
+		data[i] ^= key[i % key_len];
+	}
+}
+
+void xor_decrypt(unsigned char* data, size_t data_len, unsigned char* key, size_t key_len)
+{
+	for (size_t i = 0; i < data_len; i++)
+	{
+		data[i] ^= key[i % key_len];
+	}
+}
+#endif
+
 __declspec(noinline) void EncryptCodeSection(LPVOID address, char* originalInstructions, int SIZE_OF_FUNCTION)
 {
 	memcpy(originalInstructions, address, SIZE_OF_FUNCTION);
+#if USE_XOR_ENCRYPTION
+	xor_encrypt((unsigned char*)originalInstructions, SIZE_OF_FUNCTION, xor_key, xor_key_size);
+#endif
 	DWORD oldProtect;
 	VirtualProtect(address, SIZE_OF_FUNCTION, PAGE_EXECUTE_READWRITE, &oldProtect);
 	for (int i = 0; i < SIZE_OF_FUNCTION; i++)
@@ -57,6 +85,9 @@ __declspec(noinline) LONG WINAPI VEHDecryptionHandler(PEXCEPTION_POINTERS except
 			{
 				DWORD oldProtect;
 				VirtualProtect((LPVOID)EncryptedFunctions[i].FunctionAddress, EncryptedFunctions[i].functionSize, PAGE_EXECUTE_READWRITE, &oldProtect);
+#if USE_XOR_ENCRYPTION
+				xor_decrypt((unsigned char*)EncryptedFunctions[i].originalInstructions, EncryptedFunctions[i].functionSize, xor_key, xor_key_size);
+#endif
 				memcpy((LPVOID)EncryptedFunctions[i].FunctionAddress, EncryptedFunctions[i].originalInstructions, EncryptedFunctions[i].functionSize);
 				VirtualProtect((LPVOID)EncryptedFunctions[i].FunctionAddress, EncryptedFunctions[i].functionSize, oldProtect, &oldProtect);
 				SetBreakpoint((LPVOID)EncryptedFunctions[i].ReturnAddress);

@@ -1,12 +1,10 @@
 #include <Windows.h>
-#include <iostream>
-#include <signal.h>
 
 #define USE_XOR_ENCRYPTION TRUE
 
 #if USE_XOR_ENCRYPTION
 unsigned char xor_key[] = "YwAYwAonvsgHUbnoYwAonvsgHUbnnvsgHUbn";
-size_t xor_key_size = strlen((char*)xor_key);
+size_t xor_key_size = NULL;
 #endif
 
 typedef struct {
@@ -129,6 +127,7 @@ __declspec(noinline) void EncryptFunction(uintptr_t functionPointer)
 {
 	if (!EncryptHandlerInitialized)
 	{
+		xor_key_size = strlen((char*)xor_key);
 		EncryptHandlerInitialized = TRUE;
 		AddVectoredExceptionHandler(1, &VEHDecryptionHandler);
 	}

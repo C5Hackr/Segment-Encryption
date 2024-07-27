@@ -20,10 +20,12 @@ size_t num_EncryptedFunctions = 0;
 
 BOOL EncryptHandlerInitialized = FALSE;
 
+#define CALL_FUNCTION_SAFE(ptr, args) ((void*(*)(va_list))(ptr))(args)
+
 #pragma optimize("", off)
-__declspec(dllexport) int endfunction(int a, int b)
+__declspec(dllexport) void* EndSED(void* returnValue)
 {
-	return a + b;
+	return returnValue;
 }
 #pragma optimize("", on)
 
@@ -123,10 +125,13 @@ __declspec(noinline) LONG WINAPI VEHDecryptionHandler(PEXCEPTION_POINTERS except
 	}
 }
 
+CRITICAL_SECTION cs;
+
 __declspec(noinline) void EncryptFunction(uintptr_t functionPointer)
 {
 	if (!EncryptHandlerInitialized)
 	{
+		InitializeCriticalSection(&cs);
 		xor_key_size = strlen((char*)xor_key);
 		EncryptHandlerInitialized = TRUE;
 		AddVectoredExceptionHandler(1, &VEHDecryptionHandler);
@@ -139,13 +144,13 @@ __declspec(noinline) void EncryptFunction(uintptr_t functionPointer)
 	while (TRUE)
 	{
 		BYTE* ptr = (BYTE*)current_address;
-		if (ptr[0] == 0xE9 && *((DWORD*)(current_address + 1)) == ((DWORD)endfunction - ((DWORD)current_address + 5)))
+		if (ptr[0] == 0xE9 && *((DWORD*)(current_address + 1)) == ((DWORD)EndSED - ((DWORD)current_address + 5)))
 		{
 			currentHookInfo->IsJMPReturn = TRUE;
 			currentHookInfo->ReturnAddress = (uintptr_t)current_address;
 			break;
 		}
-		else if (ptr[0] == 0xE8 && *((DWORD*)(current_address + 1)) == ((DWORD)endfunction - ((DWORD)current_address + 5)))
+		else if (ptr[0] == 0xE8 && *((DWORD*)(current_address + 1)) == ((DWORD)EndSED - ((DWORD)current_address + 5)))
 		{
 			currentHookInfo->IsJMPReturn = FALSE;
 			currentHookInfo->ReturnAddress = (uintptr_t)current_address;
@@ -159,4 +164,15 @@ __declspec(noinline) void EncryptFunction(uintptr_t functionPointer)
 	currentHookInfo->originalInstructions = (char*)malloc(SIZE_OF_FUNCTION * sizeof(char));
 	memcpy(currentHookInfo->originalInstructions, (void*)functionPointer, SIZE_OF_FUNCTION);
 	EncryptCodeSection((LPVOID)functionPointer, currentHookInfo->originalInstructions, SIZE_OF_FUNCTION);
+}
+
+__declspec(noinline) void* CallFunction(void* ptr, ...)
+{
+	EnterCriticalSection(&cs);
+	va_list args;
+	va_start(args, NULL);
+	void* returnValue = CALL_FUNCTION_SAFE(ptr, args);
+	va_end(args);
+	LeaveCriticalSection(&cs);
+	return returnValue;
 }

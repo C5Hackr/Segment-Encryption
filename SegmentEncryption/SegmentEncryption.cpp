@@ -64,8 +64,11 @@ void bubbleSort(int arr[], int n) {
 }
 #pragma endregion
 
-__declspec(noinline) int testCCode()
+__declspec(noinline) void* testCCode(void* DummyArgument, int numberArgument)
 {
+	// Arg test
+	printf("Arg 1 is: %d | Function will return %d + 1\n", numberArgument, numberArgument);
+
 	// Arithmetic operations
 	int a = 5, b = 3;
 	int result = a + b * 2 - 1;
@@ -124,11 +127,15 @@ __declspec(noinline) int testCCode()
 	printf("Size of int: %lu bytes\n", sizeof(int));
 
 
-	return endfunction(0, 0);
+	return EndSED((void*)(numberArgument + 1));
 }
 
-__declspec(noinline) int testCCode2()
+__declspec(noinline) void* testCCode2(void* DummyArgument, const char* stringArg, int numberArg)
 {
+	// Arg test
+	printf("Arg 1 is: %s\n", stringArg);
+	printf("Arg 2 is: %d\n", numberArg);
+
 	// String manipulation
 	char str1[20] = "Hello";
 	char str2[20] = "World";
@@ -192,14 +199,14 @@ __declspec(noinline) int testCCode2()
 	}
 	printf("\n");
 
-	return endfunction(0, 0);
+	return EndSED((void*)(0));
 }
 
 /*
-__declspec(noinline) int DemoFunction() //Function type must be a INT, and must have the __declspec(noinline) attribute.
+__declspec(noinline) void* DemoFunction(void* DummyArgument) //Function type must be a void*, and must have the __declspec(noinline) attribute and the "void* DummyArgument" as the first argument (this argument is never used but is required to have).
 {
 	printf("[ourfunction] - hello world!\n");
-	return endfunction(0, 0); //Function must end with "return endfunction(0, 0)".
+	return EndSED((void*)(0)); //Function must end with "return EndSED((void*)(returnValueHere))".
 }
 */
 
@@ -211,9 +218,10 @@ int main() //Project must be in Release mode, x64 and x86 are both supported.
 	system("pause");
 	printf("[START!]\n");
 	printf("[======================testCCode========================]\n");
-	testCCode();
+	int returnValue = (int)CallFunction(testCCode, 15); //Call encrypted function "testCCode" with 1 param.
+	printf("testCCode return value is: %d\n", returnValue);
 	printf("[======================testCCode2=======================]\n");
-	testCCode2();
+	CallFunction(testCCode2, "abcd", 123); //Call encrypted function "testCCode2" with 2 params.
 	printf("[END!]\n");
 	system("pause");
 	exit(0);

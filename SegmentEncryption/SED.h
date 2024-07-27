@@ -170,7 +170,7 @@ __declspec(noinline) void* CallFunction(void* ptr, ...)
 {
 	EnterCriticalSection(&cs);
 	va_list args;
-	va_start(args, NULL);
+	va_start(args, ptr);
 	void* returnValue = CALL_FUNCTION_SAFE(ptr, args);
 	va_end(args);
 	LeaveCriticalSection(&cs);

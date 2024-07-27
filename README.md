@@ -5,9 +5,6 @@ Segment-Encryption-Decryption (SED) is a project I made during a all nighter for
 ## Quick Note
 Starring the repo helps a lot!
 
-## Todo
-Make SED Thread Safe.
-
 ## Screenshots
 
 **Before:**

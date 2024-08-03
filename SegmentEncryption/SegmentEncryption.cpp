@@ -142,9 +142,9 @@ __declspec(noinline) void* testCCode2(void* DummyArgument, const char* stringArg
 	char str3[40];
 
 	// String concatenation
-	strcpy(str3, str1);
-	strcat(str3, " ");
-	strcat(str3, str2);
+	strcpy_s(str3, str1);
+	strcat_s(str3, " ");
+	strcat_s(str3, str2);
 	printf("Concatenated string: %s\n", str3);
 
 	// String length
@@ -155,7 +155,7 @@ __declspec(noinline) void* testCCode2(void* DummyArgument, const char* stringArg
 
 	// Structures
 	struct Person person1;
-	strcpy(person1.name, "John Doe");
+	strcpy_s(person1.name, "John Doe");
 	person1.age = 30;
 
 	struct Person person2 = { "Jane Doe", 25 };
